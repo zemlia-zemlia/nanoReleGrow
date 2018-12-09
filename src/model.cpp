@@ -1,0 +1,125 @@
+#include "conf.hpp"
+#include "model.hpp"
+#include <EEPROM.h>
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h> // https://github.com/maniacbug/RF24
+#include <DHT.h>
+const uint64_t pipe = 0xF0F1F2F3F4AA; // индитификатор передачи, "труба"
+DHT sensor(DHTPIN, DHT11);
+RF24 radio(4, 5); // CE, CSN
+Hard::Hard(Data   _data){
+  data = _data;
+}
+
+
+bool Hard::setupRadio()
+{
+  radio.begin();
+  delay(2);
+  radio.setChannel(60);
+  radio.setDataRate(RF24_1MBPS);
+  radio.setPALevel(RF24_PA_HIGH);
+  radio.openReadingPipe(1, pipe);
+  radio.startListening();
+  return true;
+}
+bool Hard::radioSendData()
+{
+  radio.stopListening();
+  delay(50);
+  radio.openWritingPipe(pipe);
+  radio.write(& data, sizeof(data));
+  delay(50);
+  radio.startListening();
+  return true;
+}
+bool Hard::eepromWrite(byte numB, byte val)
+{
+
+  EEPROM.write(numB, val);
+  delay(50);
+  return true;
+}
+
+bool Hard::eepromRead()
+{
+  data.temperS = float(EEPROM.read(0)); // temper
+  data.delta_T = float(EEPROM.read(1)); // delta temper
+  data.humiS = float(EEPROM.read(2)); // humi
+
+  data.delta_H = float(EEPROM.read(3)); // delta H
+  return true;
+}
+bool Hard::outSerial()
+{
+  Serial.print(data.temper);
+    Serial.print(";");
+    Serial.print(data.humi);
+    Serial.print(";");
+
+    Serial.println(data.soil);
+
+    Serial.print(data.temperS);
+    Serial.print(";");
+    ;
+    Serial.print(data.delta_T);
+      Serial.print(";");
+    Serial.print(data.humiS);
+      Serial.print(";");
+      Serial.println(data.delta_H);
+      Serial.println(";");
+      Serial.print(data.Radiator);
+      Serial.print(";");
+      Serial.println(data.Humi);
+      Serial.println(";");
+      Serial.print(data.VentIn);
+      Serial.print(";");
+      Serial.println(data.Pompa);
+}
+bool Hard::sensors(){
+  int soil = analogRead(HUMI_SOIL);
+  data.soil = map(soil, 1023, 0, 0, 99);
+  float temper = sensor.readTemperature();
+  if (temper != 0){
+  data.temper = temper ;
+  }
+  float humi = sensor.readHumidity();
+  if (humi != 0){
+  data.humi = humi;
+  }
+  return true;
+}
+bool Hard::Lisnener(){
+  byte val[2];
+  if (radio.available())
+   {
+     // проверяем не пришло ли чего в буфер.
+     radio.read(val, sizeof(val)); // читаем данные и указываем сколько байт читать
+     Serial.println(val[0]);
+     if (val[0] == 1)
+     {
+       Hard::radioSendData();
+     }
+      if (val[0] == 2) // записать в EEPROM !!!  temperS
+     {
+       Serial.print("-------");
+       Serial.println(val[1]);
+       Hard::eepromWrite(0, val[1]);
+       delay(100);
+       Hard::eepromRead();
+     }
+     if (val[0] == 3) // записать в EEPROM !!!  delta_T
+    {
+      Serial.print("-------");
+      Serial.println(val[1]);
+      Hard::eepromWrite(1, val[1]);
+      delay(100);
+      Hard::eepromRead();
+    }
+
+
+
+
+   }
+}
