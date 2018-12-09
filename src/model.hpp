@@ -18,9 +18,10 @@ struct Data{
 };
 
 struct Hard{
-  Hard(Data  data);
-  Data data;
-  bool hardSwap(char* pin);
+  Hard(Data  _data);
+  Data  data;
+  bool hardSwap(byte num);
+  bool hardSwap(byte num, bool state);
   bool setupRadio();
   bool radioSendData();
   bool eepromWrite(byte numB, byte val);
@@ -28,6 +29,7 @@ struct Hard{
   bool outSerial();
   bool sensors();
   bool Lisnener();
+  bool logic();
 
 
 };
