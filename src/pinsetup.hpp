@@ -2,9 +2,9 @@ pinMode(battPIN, OUTPUT);
  pinMode(humPIN, OUTPUT);
  pinMode(ventinPIN, OUTPUT);
  pinMode(pompaPIN, OUTPUT);
+ pinMode(dopPIN, OUTPUT);
+ digitalWrite(dopPIN, 1);
  digitalWrite(battPIN, 1);
  digitalWrite(humPIN, 1);
  digitalWrite(ventinPIN, 1);
  digitalWrite(pompaPIN, 1);
-
- 

@@ -6,7 +6,7 @@
 #include <RF24.h> // https://github.com/maniacbug/RF24
 #include <DHT.h>
 const uint64_t pipe = 0xF0F1F2F3F4AA; // индитификатор передачи, "труба"
-DHT sensor(DHTPIN, DHT11);
+DHT sensor(DHTPIN, DHT22);
 RF24 radio(4, 5); // CE, CSN
 Hard::Hard(Data   _data){
 data = _data;

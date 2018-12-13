@@ -4,3 +4,4 @@
 #define humPIN A2 // увлажнитель
 #define ventinPIN A3 // вентилятор
 #define pompaPIN A4 // помпа
+#define dopPIN A5 // dop pin
